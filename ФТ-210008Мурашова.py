@@ -1,4 +1,5 @@
 import enum
+import logging
 
 # Названия фигур.
 class TypesFigures(enum.Enum):
@@ -39,16 +40,20 @@ def input_name():
     while True:
         try:
             num = int(input('- '))
+            logging.info(f'Было введено: {num}')
         except:
             print('Ошибка: ' + invalid_input_err + '!')
+            logging.error(invalid_input_err, exc_info=True)
             continue
         if num < min or num > max:
             print('Ошибка: ' + out_of_range_err + '!')
+            logging.error(out_of_range_err)
             continue
         # Ищем в TypesFigures название фигуры с тем же value, 
         # что ввел пользователь и возвращаем.
         for name in TypesFigures:
             if name.value == num:
+                logging.info(f'Была выбрана фигура: {name}')
                 return name
 
 # Ввод клетки со своими координатами.
@@ -64,8 +69,10 @@ def input_square(previous_square : Square = None):
 
     while True:
         try:
-            nums = input(text_for_input + ': ').split()
-
+            text = input(text_for_input + ': ')
+            logging.info(f'Было введено: {text}')
+            nums = text.split()
+            
             if len(nums) != 2:
                 raise Exception
 
@@ -73,14 +80,17 @@ def input_square(previous_square : Square = None):
             horizontal = int(nums[1])
         except:
             print('Ошибка: ' + invalid_input_err + '!')
+            logging.error(invalid_input_err, exc_info=True)
             continue
 
         repeat = False
         if vertical < min or vertical > max:
             print('Ошибка: ' + out_of_range_v_err + '! Попробуйте ещё раз...')
+            logging.error(out_of_range_v_err)
             repeat = True
         if horizontal < min or horizontal > max:
             print('Ошибка: ' + out_of_range_h_err + '! Попробуйте ещё раз...')
+            logging.error(out_of_range_h_err)
             repeat = True
         
         if repeat:
@@ -90,8 +100,10 @@ def input_square(previous_square : Square = None):
             if vertical == previous_square.vertical and \
                 horizontal == previous_square.horizontal:
                 print('Ошибка: ' + same_coordinates_err + '! Попробуйте ещё раз...')
+                logging.error(same_coordinates_err)
                 continue
-
+        
+        logging.info(f'Была выбрана вертикаль {vertical} и горизонталь {horizontal}')
         return Square(vertical, horizontal)
 
 # Возвращает булево значение на равенство цветов клеток у двух фигур.
@@ -177,6 +189,8 @@ def get_kill_two_move(figure1: Figure, figure2: Figure):
     # клетка не найдена => возвращаем None.
     return None
 
+logging.basicConfig(level=logging.INFO, filename="logfile.log", filemode="a",
+                        format="%(asctime)s %(levelname)s %(message)s")
 # Ввод названия фигуры.
 name = input_name()
 # Ввод координат клетки для первой фигуры.
@@ -193,28 +207,26 @@ figure2 = Figure(square)
 word = 'одинаковыми' if get_equality_color_square(figure1, figure2) else 'разными'
 # Выводим полученный результат.
 print(f'а) Цвета клеток двух фигур являются {word}.')
+logging.info(f'а) Цвета клеток двух фигур являются {word}.')
 
 # Проверяем возможность сруба за один ход.
 if get_kill_one_move(figure1, figure2):
     print('б) Первая фигура угрожает второй.')
     print('в) Первая фигура может срубить вторую за один ход.')
+    logging.info('б) Первая фигура угрожает второй.')
+    logging.info('в) Первая фигура может срубить вторую за один ход.')
 # Если сруб невозможен, то ищем возможность сруба за два хода.
 else:
     print('б) Первая фигура не угрожает второй.')
+    logging.info('б) Первая фигура не угрожает второй.')
     square = get_kill_two_move(figure1, figure2)
     # Если невозможно срубить за два хода, выводим полученный результат.
     if square == None:
         print('в) Первая фигура не может срубить вторую за два хода.')
+        logging.info('в) Первая фигура не может срубить вторую за два хода.')
     # Если возможен, то выводим клетку, через которую возможно это сделать.
     else:
         print('в) Первая фигура может срубить вторую за два хода, ' + 
                 f'где первый ход будет {square}.')
-
-
-
-
-
-
-
-
-
+        logging.info('в) Первая фигура может срубить вторую за два хода, ' + 
+                f'где первый ход будет {square}.')
